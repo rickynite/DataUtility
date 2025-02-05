@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for file input to handle user file uploads
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+    // Event listener for URL input to fetch data from the URL
+    document.getElementById('fetchButton').addEventListener('click', handleUrlInput);
 });
 
 let deferredPrompt;
@@ -56,8 +58,31 @@ function handleFileSelect(event) {
     reader.readAsText(file);
 }
 
+function handleUrlInput() {
+    const url = document.getElementById('urlInput').value;
+    if (!url) {
+        alert('No URL entered');
+        return;
+    }
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(contents => {
+            const contentType = response.headers.get('content-type');
+            processFile(contents, contentType);
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            alert('Failed to fetch data from the URL. Please check the URL and try again.');
+        });
+}
+
 function processFile(contents, type) {
-    if (type === 'text/csv') {
+    if (type.includes('text/csv')) {
         Papa.parse(contents, {
             complete: function(results) {
                 plotData(results.data);
@@ -67,7 +92,7 @@ function processFile(contents, type) {
                 alert('There was an error parsing the CSV file. Please check the file format.');
             }
         });
-    } else if (type === 'application/json') {
+    } else if (type.includes('application/json')) {
         try {
             const data = JSON.parse(contents);
             if (data.data && Array.isArray(data.data)) {

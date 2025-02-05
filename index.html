@@ -9,6 +9,7 @@
 <body>
     <input type="file" id="fileInput">
     <input type="text" id="urlInput" placeholder="Enter URL">
+    <button id="fetchButton">Fetch Data</button>
     <div id="myDiv"></div>
     <button id="installButton" style="display:none;">Install App</button>
 
@@ -18,6 +19,7 @@
     <script src="main.js"></script>
     <script>
         document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        document.getElementById('fetchButton').addEventListener('click', handleUrlInput);
     </script>
 </body>
 </html>
