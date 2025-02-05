@@ -5,23 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data Utility</title>
   <link rel="canonical" href="https://rickynite.github.io/DataUtility/" />
-  <link rel="manifest" href="/DataUtility/manifest.webmanifest">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <input type="file" id="fileInput">
-  <input type="text" id="urlInput" placeholder="Enter URL">
-  <button id="fetchButton">Fetch Data</button>
+  <button id="installButton" class="icon-button" style="display:none;">
+    <img src="img/icon-192x192.png" alt="Install App" class="app-icon">
+  </button>
   <div id="myDiv"></div>
-  <button id="installButton" style="display:none;">Install App</button>
+  
+  <label for="fileInput" class="custom-file-label">Data</label>
+  <input type="file" id="fileInput" accept=".csv,.json" style="display:none;">
+  <span id="fileInputName"></span>
+  <br>
+  
+  <label for="plotConfigInput" class="custom-file-label">Config</label>
+  <input type="file" id="plotConfigInput" accept=".json" style="display:none;">
+  <span id="plotConfigInputName"></span>
+  <br>
 
   <script>
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker.register (
-        '/DataUtility/sw.js',
-        {scope: '/DataUtility/'}
-      )
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(function(registration) {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(function(error) {
+          console.log('Service Worker registration failed:', error);
+        });
     }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installButton').style.display = 'block';
+    });
+
+    document.getElementById('installButton').addEventListener('click', () => {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        deferredPrompt = null;
+      });
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+      handleFileSelect(event);
+      document.getElementById('fileInputName').textContent = event.target.files[0].name;
+    });
+
+    document.getElementById('plotConfigInput').addEventListener('change', function(event) {
+      handleConfigSelect(event);
+      document.getElementById('plotConfigInputName').textContent = event.target.files[0].name;
+    });
+
+    document.querySelector('.custom-file-label[for="fileInput"]').addEventListener('click', function() {
+      document.getElementById('fileInput').click();
+    });
+
+    document.querySelector('.custom-file-label[for="plotConfigInput"]').addEventListener('click', function() {
+      document.getElementById('plotConfigInput').click();
+    });
   </script>
 
   <!-- Include Plotly.js and PapaParse from CDN -->
@@ -29,9 +78,5 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script src="js/plotting.js"></script>
   <script src="js/main.js"></script>
-  <script>
-      document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-      document.getElementById('fetchButton').addEventListener('click', handleUrlInput);
-  </script>
 </body>
 </html>

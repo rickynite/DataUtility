@@ -1,19 +1,18 @@
-var GHPATH = '/DataUtility';
+var DUPATH = '/DataUtility';
 var APP_PREFIX = 'dupwa_';
 var VERSION = 'version_001';
 var URLS = [    
-  `${GHPATH}/`,
-  `${GHPATH}/index.html`,
-  `${GHPATH}/offline.html`,
-  `${GHPATH}/manifest.webmanifest`,
-  `${GHPATH}/css/styles.css`,
-  `${GHPATH}/img/icon-192x192.png`,
-  `${GHPATH}/img/icon-512x512.png`,
-  `${GHPATH}/js/main.js`,
-  `${GHPATH}/js/plotting.js`,
-  `${GHPATH}/sample.json`,
-  `${GHPATH}/sample2.json`,
-  `${GHPATH}/sample.csv`,
+  `${DUPATH}/`,
+  `${DUPATH}/index.html`,
+  `${DUPATH}/offline.html`,  
+  `${DUPATH}/css/styles.css`,
+  `${DUPATH}/img/icon-192x192.png`,
+  `${DUPATH}/img/icon-512x512.png`,
+  `${DUPATH}/js/main.js`,
+  `${DUPATH}/js/plotting.js`,
+  `${DUPATH}/sample.json`,
+  `${DUPATH}/sample2.json`,
+  `${DUPATH}/sample.csv`,
   'https://cdn.plot.ly/plotly-latest.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js'
 ];

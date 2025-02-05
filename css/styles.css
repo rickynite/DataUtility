@@ -5,8 +5,6 @@ body {
     margin: 0;
     padding: 2em;
     height: 90vh;
-    background: url(../img/icon.png) 95% 95% no-repeat;
-    background-size: 20vh;
 }
 h1 {
     font-size: 1.5em;
@@ -19,4 +17,52 @@ p {
 }
 a {
     color: #369;
+}
+
+.app-icon {
+    width: 50px; /* Reduce the icon size */
+    height: 50px;
+    display: block;
+    margin: 0 auto; /* Center the icon */
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    outline: none;
+}
+
+#installButton {
+    display: block;
+    margin-bottom: 1em;
+}
+
+#myDiv {
+    margin-bottom: 1em;
+}
+
+.custom-file-label {
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  margin-right: 10px;
+  border: 1px solid #007bff;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.custom-file-label:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+input[type="file"] {
+  display: none;
 }
