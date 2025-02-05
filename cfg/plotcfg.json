@@ -1,0 +1,17 @@
+{
+    "type": "scatter",
+    "mode": "lines+markers",
+    "layout": {
+      "title": "Sample Plot",
+      "xaxis": {"title": "X Axis"},
+      "yaxis": {
+        "title": "Y Axis",
+        "range": [0, 10]
+      },
+      "width": 800,
+      "height": 600
+    },
+    "config": {
+      "displaylogo": false
+    }
+}
