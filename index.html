@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Utility</title>
-    <link rel="manifest" href="manifest.webmanifest">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Utility</title>
+  <link rel="canonical" href="https://rickynite.github.io/DataUtility/" />
+  <link rel="manifest" href="/DataUtility/manifest.webmanifest">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <input type="file" id="fileInput">
-    <input type="text" id="urlInput" placeholder="Enter URL">
-    <button id="fetchButton">Fetch Data</button>
-    <div id="myDiv"></div>
-    <button id="installButton" style="display:none;">Install App</button>
+ 
+  <h1>Data Utility</h1>
+  <p>
+    See:
+    <a href="https://github.com/rickynite/DataUtility">https://github.com/rickynite/DataUtility</a> 
+  </p>
 
-    <!-- Include Plotly.js and PapaParse from CDN -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="plotting.js"></script>
-    <script src="main.js"></script>
-    <script>
-        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-        document.getElementById('fetchButton').addEventListener('click', handleUrlInput);
-    </script>
+  <script>
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.register (
+          '/DataUtility/sw.js',
+          {scope: '/DataUtility/'}
+        )
+      }
+  </script>
+  <script src="js/app.js"></script>
 </body>
 </html>
