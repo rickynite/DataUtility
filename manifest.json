@@ -1,8 +1,8 @@
 {
     "name": "Data Utility App",
-    "short_name": "DataUtil",
+    "short_name": "DataUtility",
     "description": "An app for visualizing data from various sources.",
-    "start_url": "/DataUtility/index.html",
+    "start_url": "index.html",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#000000",

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Data Utility</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .offline-message {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-message">
+        <h1>You Are Offline</h1>
+        <p>Please check your internet connection to access all features.</p>
+        <p>Here's what you can do offline:</p>
+        <ul>
+            <li>View this message</li>
+            <li>Load and visualize data from previously selected local files (if supported by your browser).</li>
+        </ul>
+    </div>
+
+    <input type="file" id="fileInput">
+    <input type="text" id="urlInput" placeholder="Enter URL (works when online)" disabled>
+    <button id="fetchButton" disabled>Fetch Data</button>
+    <div id="myDiv"></div>
+    <button id="installButton" style="display:none;">Install App</button>
+
+    <!-- Include Plotly.js and PapaParse from CDN -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="main.js"></script>
+    <script>
+        // Allow local file selection even offline:
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        document.getElementById('fileInput').disabled = false;
+
+        // Optionally, you could show a message or last plotted data here
+    </script>
+</body>
+</html>
+

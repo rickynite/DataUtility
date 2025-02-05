@@ -4,12 +4,12 @@ const urlsToCache = [
     '/index.html',
     '/main.js',
     '/manifest.json',
-    '/node_modules/plotly.js/dist/plotly.min.js',
-    '/node_modules/papaparse/papaparse.min.js',
+    'https://cdn.plot.ly/plotly-latest.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js',
     '/sample.json',
-    '/icons/icon-192x192.png', // Ensure this path is correct
-    '/icons/icon-512x512.png'  // Ensure this path is correct
-    // '/offline.html' // Uncomment if you have an offline fallback page
+    '/icons/icon-192x192.png',
+    '/icons/icon-512x512.png',
+    '/offline.html'
 ];
 
 self.addEventListener('install', event => {
@@ -22,19 +22,35 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                return response || fetch(event.request).then(response => {
-                    return caches.open(CACHE_NAME).then(cache => {
+    if (event.request.url.startsWith('http') && !event.request.url.startsWith(self.location.origin)) {
+        // For external URLs, cache and serve
+        event.respondWith(
+            caches.open(CACHE_NAME).then(cache => {
+                return cache.match(event.request).then(response => {
+                    return response || fetch(event.request).then(response => {
                         cache.put(event.request, response.clone());
                         return response;
                     });
                 });
-            }).catch(() => {
-                // return caches.match('/offline.html'); // Uncomment if you have an offline fallback page
             })
-    );
+        );
+    } else {
+        // For local resources, use the existing strategy
+        event.respondWith(
+            caches.match(event.request)
+                .then(response => {
+                    return response || fetch(event.request).then(response => {
+                        return caches.open(CACHE_NAME).then(cache => {
+                            cache.put(event.request, response.clone());
+                            return response;
+                        });
+                    });
+                }).catch(() => {
+                    // If both cache and network fail, show the offline page
+                    return caches.match('/offline.html');
+                })
+        );
+    }
 });
 
 self.addEventListener('activate', event => {

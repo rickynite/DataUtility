@@ -69,11 +69,10 @@ function handleUrlInput() {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.text();
+            return response.text().then(text => ({ text, contentType: response.headers.get('content-type') }));
         })
-        .then(contents => {
-            const contentType = response.headers.get('content-type');
-            processFile(contents, contentType);
+        .then(({ text, contentType }) => {
+            processFile(text, contentType);
         })
         .catch(error => {
             console.error('Fetch Error:', error);
@@ -110,47 +109,9 @@ function processFile(contents, type) {
     }
 }
 
-function plotData(data) {
-    if (!Array.isArray(data) || data.length === 0) {
-        console.error('Invalid data for plotting');
-        alert('No valid data to plot.');
-        return;
-    }
-    const plotData = [{
-        x: data.map(row => row.x || row[0]),
-        y: data.map(row => row.y || row[1]),
-        type: 'scatter',
-        mode: 'lines+markers'
-    }];
-    const layout = {};
-    const config = { displaylogo: false };
-    Plotly.newPlot('myDiv', plotData, layout, config);
-}
-
-function plotSampleData() {
-    fetch('sample.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.data && Array.isArray(data.data)) {
-                plotData(data.data);
-            } else {
-                throw new Error('Invalid sample data structure');
-            }
-        })
-        .catch(error => {
-            console.error('Fetch Error:', error);
-            alert('Failed to load sample data. Please check your internet connection or try again later.');
-        });
-}
-
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/DataUtility/service-worker.js')
+        navigator.serviceWorker.register('service-worker.js')
             .then(registration => {
                 console.log('Service Worker registered with scope:', registration.scope);
             })
