@@ -111,7 +111,7 @@ function processFile(contents, type) {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
+        navigator.serviceWorker.register('/DataUtility/service-worker.js', { scope: '/DataUtility/' })
             .then(registration => {
                 console.log('Service Worker registered with scope:', registration.scope);
             })
