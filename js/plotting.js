@@ -42,9 +42,9 @@ function handleConfigSelect(event) {
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
-            configData = JSON.parse(e.target.result);
+            currentConfig = JSON.parse(e.target.result);
             console.log('Configuration loaded successfully');
-            if (currentData) {
+            if (currentData.length > 0) {
                 plotData(currentData); // Re-plot if data exists
             } else {
                 alert('Configuration loaded. Please upload or select data to see changes.');
@@ -66,17 +66,20 @@ function handleConfigSelect(event) {
  * @param {Array} data - The data to plot.
  */
 function plotData(data) {
-    if (!Array.isArray(data) || data.length === 0) {
+    // Check if data is inside an object with a 'data' property
+    let plotDataArray = Array.isArray(data) ? data : (data.data || []);
+
+    if (!Array.isArray(plotDataArray) || plotDataArray.length === 0) {
         console.error('Invalid data for plotting');
         alert('No valid data to plot.');
         return;
     }
-    currentData = data; // Save the current data
+    currentData = plotDataArray; // Save the current data
     applyConfig(currentConfig).then(config => {
         console.log('Applying config:', config);
         const plotData = [{
-            x: data.map(row => row.x || row[0]),
-            y: data.map(row => row.y || row[1]),
+            x: plotDataArray.map(row => row.x || row[0]),
+            y: plotDataArray.map(row => row.y || row[1]),
             type: config.type || 'scatter',
             mode: config.mode || 'lines+markers'
         }];
@@ -87,8 +90,8 @@ function plotData(data) {
         console.error('Error applying configuration:', error);
         alert('Failed to apply configuration. Using default settings.');
         Plotly.newPlot('myDiv', [{
-            x: data.map(row => row.x || row[0]),
-            y: data.map(row => row.y || row[1]),
+            x: plotDataArray.map(row => row.x || row[0]),
+            y: plotDataArray.map(row => row.y || row[1]),
             type: 'scatter',
             mode: 'lines+markers'
         }], {}, { displaylogo: false });

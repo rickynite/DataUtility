@@ -3,9 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     plotSampleData();
 
     // Event listener for file input to handle user file uploads
-    document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-    // Assuming 'fetchButton' and 'urlInput' exist in your HTML
-    document.getElementById('fetchButton').addEventListener('click', handleUrlInput);
+    document.getElementById('fileInput').addEventListener('change', handleFileSelect);   
+    
 });
 
 let deferredPrompt;
@@ -48,12 +47,32 @@ function handleFileSelect(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                plotData(data); // Assuming plotData is defined in plotting.js
-            } catch (error) {
-                console.error('JSON Parse Error:', error);
-                alert('There was an error parsing the JSON file. Please check the file format or structure.');
+            const contents = e.target.result;
+            const extension = file.name.split('.').pop().toLowerCase();
+
+            if (extension === 'csv') {
+                Papa.parse(contents, {
+                    complete: function(results) {
+                        // Remove the header row if present
+                        const data = results.data.slice(1); // Assuming first row is headers
+                        plotData(data);
+                    },
+                    error: function(error) {
+                        console.error('CSV Parse Error:', error);
+                        alert('There was an error parsing the CSV file. Please check the file format.');
+                    }
+                });
+            } else if (extension === 'json') {
+                try {
+                    const data = JSON.parse(contents);
+                    plotData(data.data || data); // Adjust based on your JSON structure
+                } catch (error) {
+                    console.error('JSON Parse Error:', error);
+                    alert('There was an error parsing the JSON file. Please check the file format or structure.');
+                }
+            } else {
+                console.error('Unsupported file type');
+                alert('This file type is not supported. Please upload a CSV or JSON file.');
             }
         };
         reader.readAsText(file);
@@ -107,7 +126,10 @@ function handleUrlInput() {
 function processFile(contents, type) {
     if (type.includes('text/csv') || type === '') {
         Papa.parse(contents, {
-            complete: results => plotData(results.data),
+            complete: results => {
+                console.log('CSV data parsed:', results.data);
+                plotData(results.data);
+            },
             error: err => {
                 console.error('CSV Parse Error:', err);
                 alert('There was an error parsing the CSV file. Please check the file format.');
@@ -116,8 +138,11 @@ function processFile(contents, type) {
     } else if (type.includes('application/json')) {
         try {
             const data = JSON.parse(contents);
-            if (Array.isArray(data) || (data.data && Array.isArray(data.data))) {
-                plotData(Array.isArray(data) ? data : data.data);
+            console.log('JSON data parsed:', data);
+            if (Array.isArray(data)) {
+                plotData(data);
+            } else if (data.data && Array.isArray(data.data)) {
+                plotData(data.data);
             } else {
                 throw new Error('Invalid JSON structure');
             }
