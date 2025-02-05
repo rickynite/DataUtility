@@ -9,21 +9,29 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
- 
-  <h1>Data Utility</h1>
-  <p>
-    See:
-    <a href="https://github.com/rickynite/DataUtility">https://github.com/rickynite/DataUtility</a> 
-  </p>
+  <input type="file" id="fileInput">
+  <input type="text" id="urlInput" placeholder="Enter URL">
+  <button id="fetchButton">Fetch Data</button>
+  <div id="myDiv"></div>
+  <button id="installButton" style="display:none;">Install App</button>
 
   <script>
-      if (navigator.serviceWorker) {
-        navigator.serviceWorker.register (
-          '/DataUtility/sw.js',
-          {scope: '/DataUtility/'}
-        )
-      }
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.register (
+        '/DataUtility/sw.js',
+        {scope: '/DataUtility/'}
+      )
+    }
   </script>
-  <script src="js/app.js"></script>
+
+  <!-- Include Plotly.js and PapaParse from CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="js/plotting.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+      document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+      document.getElementById('fetchButton').addEventListener('click', handleUrlInput);
+  </script>
 </body>
 </html>
