@@ -1,5 +1,5 @@
 let configData = {};
-let currentData = null;
+let currentData = [];
 let currentConfig = {};
 
 /**
