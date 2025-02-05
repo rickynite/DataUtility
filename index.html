@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Utility</title>
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <input type="file" id="fileInput">
+    <input type="text" id="urlInput" placeholder="Enter URL">
+    <div id="myDiv"></div>
+
+    <script src="node_modules/plotly.js/dist/plotly.min.js"></script>
+    <script src="node_modules/papaparse/papaparse.min.js"></script>
+    <script src="main.js"></script>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+    </script>
+</body>
+</html>
