@@ -1,24 +1,38 @@
 let configData = {};
-let currentData = null; // Store the last plotted data
+let currentData = null;
+let currentConfig = {};
 
+/**
+ * Fetches the configuration from a local JSON file or uses cached configuration.
+ * @returns {Promise<Object>} - Returns a promise that resolves to the configuration object.
+ */
 function getConfig() {
     if (Object.keys(configData).length !== 0) {
         return Promise.resolve(configData);
-    } else {
-        console.log('Fetching default config'); // Add this line
-        return fetch('cfg/plotcfg.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to load default configuration file');
-                }
-                return response.json();
-            }).then(config => {
-                console.log('Default config loaded:', config); // Add this line
-                return config;
-            });
     }
+    console.log('Fetching default config');
+    return fetch('cfg/plotcfg.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load default configuration file');
+            }
+            return response.json();
+        })
+        .then(config => {
+            console.log('Default config loaded:', config);
+            configData = config; // Cache the config for future use
+            return config;
+        })
+        .catch(error => {
+            console.error('Error fetching default config:', error);
+            return {}; // Return an empty object to not break further execution
+        });
 }
 
+/**
+ * Handles configuration file selection by the user.
+ * @param {Event} event - The file selection event.
+ */
 function handleConfigSelect(event) {
     const file = event.target.files[0];
     if (!file) {
@@ -26,26 +40,31 @@ function handleConfigSelect(event) {
         return;
     }
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = (e) => {
         try {
             configData = JSON.parse(e.target.result);
             console.log('Configuration loaded successfully');
-            // Re-plot data if we have data available
             if (currentData) {
-                plotData(currentData);
+                plotData(currentData); // Re-plot if data exists
+            } else {
+                alert('Configuration loaded. Please upload or select data to see changes.');
             }
         } catch (error) {
             console.error('Error parsing configuration file:', error);
             alert('The configuration file is not valid JSON.');
         }
     };
-    reader.onerror = function(error) {
+    reader.onerror = (error) => {
         console.error('Error reading configuration file:', error);
         alert('There was an error reading the configuration file.');
     };
     reader.readAsText(file);
 }
 
+/**
+ * Plots the given data using Plotly.js with the current configuration.
+ * @param {Array} data - The data to plot.
+ */
 function plotData(data) {
     if (!Array.isArray(data) || data.length === 0) {
         console.error('Invalid data for plotting');
@@ -53,8 +72,8 @@ function plotData(data) {
         return;
     }
     currentData = data; // Save the current data
-    getConfig().then(config => {
-        console.log('Applying config:', config); // Add this line
+    applyConfig(currentConfig).then(config => {
+        console.log('Applying config:', config);
         const plotData = [{
             x: data.map(row => row.x || row[0]),
             y: data.map(row => row.y || row[1]),
@@ -65,66 +84,45 @@ function plotData(data) {
         const configOptions = config.config || { displaylogo: false };
         Plotly.newPlot('myDiv', plotData, layout, configOptions);
     }).catch(error => {
-        console.error('Error loading configuration:', error);
-        alert('Failed to load configuration. Using default settings.');
-        const plotData = [{
+        console.error('Error applying configuration:', error);
+        alert('Failed to apply configuration. Using default settings.');
+        Plotly.newPlot('myDiv', [{
             x: data.map(row => row.x || row[0]),
             y: data.map(row => row.y || row[1]),
             type: 'scatter',
             mode: 'lines+markers'
-        }];
-        const layout = {};
-        const configOptions = { displaylogo: false };
-        Plotly.newPlot('myDiv', plotData, layout, configOptions);
+        }], {}, { displaylogo: false });
     });
 }
 
-function plotSampleData() {
-    fetch('sample.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.data && Array.isArray(data.data)) {
-                plotData(data.data);
-            } else {
-                throw new Error('Invalid sample data structure');
-            }
-        })
-        .catch(error => {
-            console.error('Fetch Error:', error);
-            alert('Failed to load sample data. Please check your internet connection or try again later.');
-        });
-
-    // Fetch and plot sample CSV data
-    fetch('sample.csv')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text();
-        })
-        .then(contents => {
-            Papa.parse(contents, {
-                complete: function(results) {
-                    plotData(results.data);
-                },
-                error: function(err) {
-                    console.error('CSV Parse Error:', err);
-                    alert('There was an error parsing the sample CSV file.');
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Fetch Error:', error);
-            alert('Failed to load sample CSV data. Please check your internet connection or try again later.');
-        });
+function applyConfig(config) {
+    return new Promise((resolve, reject) => {
+        try {
+            currentConfig = config; // Update the current configuration
+            resolve(config);
+        } catch (error) {
+            reject(error);
+        }
+    });
 }
 
-// Call plotSampleData when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    plotSampleData();
-});
+/**
+ * Loads and plots sample data from JSON and CSV files.
+ */
+function plotSampleData() {
+    const sampleFiles = ['sample.json', 'sample.csv'];
+    sampleFiles.forEach(file => {
+        fetch(file)
+            .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok'))
+            .then(contents => {
+                const type = file.endsWith('.csv') ? 'text/csv' : 'application/json';
+                processFile(contents, type);
+            })
+            .catch(error => {
+                console.error(`Fetch Error for ${file}:`, error);
+                alert(`Failed to load sample data from ${file}. Please check your connection or try again later.`);
+            });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', plotSampleData);

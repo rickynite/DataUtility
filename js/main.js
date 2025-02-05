@@ -4,31 +4,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for file input to handle user file uploads
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-    // Event listener for URL input to fetch data from the URL
+    // Assuming 'fetchButton' and 'urlInput' exist in your HTML
     document.getElementById('fetchButton').addEventListener('click', handleUrlInput);
 });
 
 let deferredPrompt;
 
+// PWA installation handling
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the mini-infobar from appearing on mobile
     e.preventDefault();
-    // Stash the event so it can be triggered later.
     deferredPrompt = e;
-    // Update UI notify the user they can install the PWA
     showInstallPromotion();
 });
 
 function showInstallPromotion() {
     const installButton = document.getElementById('installButton');
-    installButton.style.display = 'block';
+    if (installButton) {
+        installButton.style.display = 'block';
+        installButton.addEventListener('click', handleInstallClick, { once: true });
+    }
+}
 
-    installButton.addEventListener('click', () => {
-        // Hide the app provided install promotion
-        installButton.style.display = 'none';
-        // Show the install prompt
+function handleInstallClick() {
+    if (deferredPrompt) {
         deferredPrompt.prompt();
-        // Wait for the user to respond to the prompt
         deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
                 console.log('User accepted the install prompt');
@@ -37,27 +36,54 @@ function showInstallPromotion() {
             }
             deferredPrompt = null;
         });
-    });
+    }
 }
 
+/**
+ * Handles file selection for plotting new data.
+ * @param {Event} event - The file selection event.
+ */
 function handleFileSelect(event) {
     const file = event.target.files[0];
-    if (!file) {
-        alert('No file selected');
-        return;
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                plotData(data); // Assuming plotData is defined in plotting.js
+            } catch (error) {
+                console.error('JSON Parse Error:', error);
+                alert('There was an error parsing the JSON file. Please check the file format or structure.');
+            }
+        };
+        reader.readAsText(file);
     }
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const contents = e.target.result;
-        processFile(contents, file.type);
-    };
-    reader.onerror = function(error) {
-        console.error('Error reading file:', error);
-        alert('There was an error reading the file. Please try again.');
-    };
-    reader.readAsText(file);
 }
 
+function handleConfigSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const config = JSON.parse(e.target.result);
+                applyConfig(config).then(() => {
+                    if (currentData.length > 0) {
+                        plotData(currentData); // Re-plot the data with the new configuration
+                    }
+                });
+            } catch (error) {
+                console.error('JSON Parse Error:', error);
+                alert('There was an error parsing the JSON file. Please check the file format or structure.');
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
+/**
+ * Handles fetching data from a URL provided by the user.
+ */
 function handleUrlInput() {
     const url = document.getElementById('urlInput').value;
     if (!url) {
@@ -65,28 +91,24 @@ function handleUrlInput() {
         return;
     }
     fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text().then(text => ({ text, contentType: response.headers.get('content-type') }));
-        })
-        .then(({ text, contentType }) => {
-            processFile(text, contentType);
-        })
+        .then(response => response.ok ? response.text().then(text => ({ text, type: response.headers.get('content-type') })) : Promise.reject('Network response was not ok'))
+        .then(({ text, type }) => processFile(text, type || ''))
         .catch(error => {
             console.error('Fetch Error:', error);
             alert('Failed to fetch data from the URL. Please check the URL and try again.');
         });
 }
 
+/**
+ * Processes file content based on its type.
+ * @param {string} contents - The content of the file or URL response.
+ * @param {string} type - MIME type of the content.
+ */
 function processFile(contents, type) {
-    if (type.includes('text/csv')) {
+    if (type.includes('text/csv') || type === '') {
         Papa.parse(contents, {
-            complete: function(results) {
-                plotData(results.data);
-            },
-            error: function(err) {
+            complete: results => plotData(results.data),
+            error: err => {
                 console.error('CSV Parse Error:', err);
                 alert('There was an error parsing the CSV file. Please check the file format.');
             }
@@ -94,8 +116,8 @@ function processFile(contents, type) {
     } else if (type.includes('application/json')) {
         try {
             const data = JSON.parse(contents);
-            if (data.data && Array.isArray(data.data)) {
-                plotData(data.data);
+            if (Array.isArray(data) || (data.data && Array.isArray(data.data))) {
+                plotData(Array.isArray(data) ? data : data.data);
             } else {
                 throw new Error('Invalid JSON structure');
             }
@@ -108,4 +130,3 @@ function processFile(contents, type) {
         alert('This file type is not supported. Please upload a CSV or JSON file.');
     }
 }
-
