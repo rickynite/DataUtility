@@ -66,20 +66,17 @@ function handleConfigSelect(event) {
  * @param {Array} data - The data to plot.
  */
 function plotData(data) {
-    // Check if data is inside an object with a 'data' property
-    let plotDataArray = Array.isArray(data) ? data : (data.data || []);
-
-    if (!Array.isArray(plotDataArray) || plotDataArray.length === 0) {
+    if (!Array.isArray(data) || data.length === 0) {
         console.error('Invalid data for plotting');
         alert('No valid data to plot.');
         return;
     }
-    currentData = plotDataArray; // Save the current data
+    currentData = data; // Save the current data
     applyConfig(currentConfig).then(config => {
         console.log('Applying config:', config);
         const plotData = [{
-            x: plotDataArray.map(row => row.x || row[0]),
-            y: plotDataArray.map(row => row.y || row[1]),
+            x: data.map(row => row.x || row[0]),
+            y: data.map(row => row.y || row[1]),
             type: config.type || 'scatter',
             mode: config.mode || 'lines+markers'
         }];
@@ -90,8 +87,8 @@ function plotData(data) {
         console.error('Error applying configuration:', error);
         alert('Failed to apply configuration. Using default settings.');
         Plotly.newPlot('myDiv', [{
-            x: plotDataArray.map(row => row.x || row[0]),
-            y: plotDataArray.map(row => row.y || row[1]),
+            x: data.map(row => row.x || row[0]),
+            y: data.map(row => row.y || row[1]),
             type: 'scatter',
             mode: 'lines+markers'
         }], {}, { displaylogo: false });
@@ -102,6 +99,17 @@ function applyConfig(config) {
     return new Promise((resolve, reject) => {
         try {
             currentConfig = config; // Update the current configuration
+            if (currentData.length > 0) {
+                const plotData = [{
+                    x: currentData.map(row => row.x || row[0]),
+                    y: currentData.map(row => row.y || row[1]),
+                    type: config.type || 'scatter',
+                    mode: config.mode || 'lines+markers'
+                }];
+                const layout = config.layout || {};
+                const configOptions = config.config || { displaylogo: false };
+                Plotly.react('myDiv', plotData, layout, configOptions);
+            }
             resolve(config);
         } catch (error) {
             reject(error);

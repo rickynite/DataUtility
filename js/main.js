@@ -2,9 +2,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Plot sample data when the page loads
     plotSampleData();
 
-    // Event listener for file input to handle user file uploads
-    document.getElementById('fileInput').addEventListener('change', handleFileSelect);   
-    
+    // Event listeners for file inputs
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        handleFileSelect(event);
+        document.getElementById('fileInputName').textContent = event.target.files[0].name;
+    });
+
+    document.getElementById('plotConfigInput').addEventListener('change', function(event) {
+        handleConfigSelect(event);
+        document.getElementById('plotConfigInputName').textContent = event.target.files[0].name;
+    });
+
+    // Event listeners for custom file labels
+    document.querySelector('.custom-file-label[for="fileInput"]').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+    });
+
+    document.querySelector('.custom-file-label[for="plotConfigInput"]').addEventListener('click', function() {
+        document.getElementById('plotConfigInput').click();
+    });
 });
 
 let deferredPrompt;
@@ -79,6 +95,10 @@ function handleFileSelect(event) {
     }
 }
 
+/**
+ * Handles configuration file selection by the user.
+ * @param {Event} event - The file selection event.
+ */
 function handleConfigSelect(event) {
     const file = event.target.files[0];
     if (file) {
